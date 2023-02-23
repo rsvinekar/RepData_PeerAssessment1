@@ -7,15 +7,44 @@ output:
 
 ## Loading required packages
 
-```{r}
+
+```r
 if(!require(tidyverse)){
   install.packages("tidyverse")
   require(tidyverse)
 }
+```
+
+```
+## Loading required package: tidyverse
+```
+
+```
+## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
+## ✔ ggplot2 3.4.0      ✔ purrr   1.0.1 
+## ✔ tibble  3.1.8      ✔ dplyr   1.0.10
+## ✔ tidyr   1.3.0      ✔ stringr 1.5.0 
+## ✔ readr   2.1.3      ✔ forcats 0.5.2 
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+```
+
+```r
 if(!require(lubridate)){
   install.packages("lubridate")
   require(lubridate)
 }
+```
+
+```
+## Loading required package: lubridate
+## 
+## Attaching package: 'lubridate'
+## 
+## The following objects are masked from 'package:base':
+## 
+##     date, intersect, setdiff, union
 ```
 
 ## Loading and preprocessing the data
@@ -28,7 +57,8 @@ if(!require(lubridate)){
 
 ### Load the data (i.e. read.csv())
 
-```{r}
+
+```r
 data <- read.csv(unz("activity.zip","activity.csv"),header = TRUE)
 ```
 
@@ -36,34 +66,73 @@ data <- read.csv(unz("activity.zip","activity.csv"),header = TRUE)
 
 OK. Check the data
 
-```{r}
-str(data)
 
+```r
+str(data)
+```
+
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : chr  "2012-10-01" "2012-10-01" "2012-10-01" "2012-10-01" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
 ```
 
 There are 17568 entries. The date column seems to be automatically interpreted. Is it done correctly?
 
-```{r}
+
+```r
 str(data$date)
+```
+
+```
+##  chr [1:17568] "2012-10-01" "2012-10-01" "2012-10-01" "2012-10-01" ...
 ```
 
 Date is in chr format.
 
-```{r}
+
+```r
 data$date <- ymd(data$date)
 str(data$date)
 ```
 
+```
+##  Date[1:17568], format: "2012-10-01" "2012-10-01" "2012-10-01" "2012-10-01" "2012-10-01" ...
+```
+
 OK, we have the correct format
 
-```{r}
+
+```r
 head(data)
+```
+
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
 ```
 
 There are NAs in the beginning
 
-```{r}
+
+```r
 tail(data)
+```
+
+```
+##       steps       date interval
+## 17563    NA 2012-11-30     2330
+## 17564    NA 2012-11-30     2335
+## 17565    NA 2012-11-30     2340
+## 17566    NA 2012-11-30     2345
+## 17567    NA 2012-11-30     2350
+## 17568    NA 2012-11-30     2355
 ```
 
 There are NAs at the end too.
@@ -80,7 +149,8 @@ There are NAs at the end too.
 
 ### Calculate the total number of steps taken per day
 
-```{r}
+
+```r
 dailysum <- data %>% 
   group_by(date) %>% 
   summarise (sum = sum(steps, na.rm=TRUE))
@@ -90,14 +160,28 @@ dailysum <- data %>%
 
 This gives us an idea of how many steps are generally taken per day in record. Completely idle days like 0 steps are very common. Apart from that, around 10000 steps is quite common.
 
-```{r}
+
+```r
 ggplot(dailysum, aes(x=sum,  na.rm = TRUE)) + geom_histogram(breaks = seq(0,25000, by=1000), na.rm = TRUE)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
 ### Calculate and report the mean and median of the total number of steps taken per day
 
-```{r}
+
+```r
 summary(dailysum)
+```
+
+```
+##       date                 sum       
+##  Min.   :2012-10-01   Min.   :    0  
+##  1st Qu.:2012-10-16   1st Qu.: 6778  
+##  Median :2012-10-31   Median :10395  
+##  Mean   :2012-10-31   Mean   : 9354  
+##  3rd Qu.:2012-11-15   3rd Qu.:12811  
+##  Max.   :2012-11-30   Max.   :21194
 ```
 
 The median value is 10395, the mean is 9354 steps.
@@ -112,7 +196,8 @@ The median value is 10395, the mean is 9354 steps.
 
 For this, we calculate the means specific to each interval. Thus, group_by(interval).
 
-```{r}
+
+```r
 interval_means <- data %>% 
   group_by(interval) %>% 
   summarise(mean = mean(steps,na.rm=TRUE))
@@ -120,19 +205,30 @@ interval_means <- data %>%
 
 Now, we can plot this time series plot with interval in x-axis and mean steps pertaining to each interval in y-axis
 
-```{r, fig.width=6, fig.height=5}
+
+```r
 ggplot(interval_means, aes(y=mean, x=interval))+
   geom_line()+
   ggtitle(label="Time series plot", subtitle="5 min interval vs mean")+
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
+
 ### Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 We use the max function
 
-```{r}
+
+```r
 interval_means[interval_means$mean == max(interval_means$mean),]
+```
+
+```
+## # A tibble: 1 × 2
+##   interval  mean
+##      <int> <dbl>
+## 1      835  206.
 ```
 
 The interval 835 has the maximum mean value of 206.1698 steps. Steps are integers, which gives \~ 206 steps.
@@ -153,9 +249,21 @@ The interval 835 has the maximum mean value of 206.1698 steps. Steps are integer
 
 Let us sum up the number of NAs and not NAs in the data
 
-```{r}
+
+```r
 sum(is.na(data$steps))
+```
+
+```
+## [1] 2304
+```
+
+```r
 sum(!is.na(data$steps))
+```
+
+```
+## [1] 15264
 ```
 
 So there are 2304 NAs and 15264 not NA values in steps
@@ -166,7 +274,8 @@ To get rid of NAs we can replace them with the mean value of the interval it bel
 
 ### Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
-```{r}
+
+```r
 data_impute <- data %>% 
   group_by(interval) %>% 
   mutate_at(vars(steps), 
@@ -176,9 +285,21 @@ data_impute <- data %>%
 
 OK, so how many NA and non-NA values we have in the new data_impute?
 
-```{r}
+
+```r
 sum(is.na(data_impute$steps))
+```
+
+```
+## [1] 0
+```
+
+```r
 sum(!is.na(data_impute$steps))
+```
+
+```
+## [1] 17568
 ```
 
 Imputed data has no NAs and a full complement of 17568 values for steps
@@ -187,7 +308,8 @@ Imputed data has no NAs and a full complement of 17568 values for steps
 
 To make the histogram, we need to take sums for steps corresponding to each day
 
-```{r}
+
+```r
 dailysum_impute <- data_impute %>% 
   group_by(date) %>% 
   summarise (sum = sum(steps, na.rm=TRUE))
@@ -195,13 +317,27 @@ dailysum_impute <- data_impute %>%
 
 Now we can plot the histogram
 
-```{r}
+
+```r
 ggplot(dailysum_impute, aes(x=sum)) +
   geom_histogram(breaks = seq(0,25000, by=1000))
 ```
 
-```{r}
+![](PA1_template_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
+
+
+```r
 summary(dailysum_impute)
+```
+
+```
+##       date                 sum       
+##  Min.   :2012-10-01   Min.   :   41  
+##  1st Qu.:2012-10-16   1st Qu.: 9819  
+##  Median :2012-10-31   Median :10762  
+##  Mean   :2012-10-31   Mean   :10766  
+##  3rd Qu.:2012-11-15   3rd Qu.:12811  
+##  Max.   :2012-11-30   Max.   :21194
 ```
 
 The median is 10762 and mean is 10766. The median and mean are now close and the distribution is less skewed. We can see that the 0 values
@@ -214,30 +350,51 @@ The median is 10762 and mean is 10766. The median and mean are now close and the
 
 ### Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
-```{r}
+
+```r
 weekday_or_end <- function(day) { ifelse(day=="Saturday" | day=="Sunday","Weekend","Weekday") }
 ```
 
-```{r}
+
+```r
 data_impute <- mutate(data_impute,dayweek = as.factor(weekday_or_end(weekdays(date))))
 ```
 
 The new data_impute function now has a dayweek column which has two factors : Weekday and Weekend. To verify, check the below command.
 
-```{r}
+
+```r
 names(data_impute)
+```
+
+```
+## [1] "steps"    "date"     "interval" "dayweek"
+```
+
+```r
 str(data_impute$dayweek)
+```
+
+```
+##  Factor w/ 2 levels "Weekday","Weekend": 1 1 1 1 1 1 1 1 1 1 ...
 ```
 
 ### Make a panel plot containing a time series plot (i.e. type = "l"type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 
-```{r}
+
+```r
 timeseries <- data_impute %>% 
   group_by(dayweek,interval) %>% 
   summarise (mean = mean(steps, na.rm=TRUE))
 ```
 
-```{r}
+```
+## `summarise()` has grouped output by 'dayweek'. You can override using the
+## `.groups` argument.
+```
+
+
+```r
 g <- ggplot(timeseries, aes(x=interval, y=mean))+
   facet_grid(dayweek~.)+
   geom_line()+
@@ -245,5 +402,7 @@ g <- ggplot(timeseries, aes(x=interval, y=mean))+
   theme(plot.title = element_text(hjust = 0.5))
 print(g)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
 
 # Thanks
