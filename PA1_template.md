@@ -340,7 +340,7 @@ summary(dailysum_impute)
 ##  Max.   :2012-11-30   Max.   :21194
 ```
 
-The median is 10762 and mean is 10766. The median and mean are now close and the distribution is less skewed. We can see that the 0 values
+The median is 10762 and mean is 10766. The median and mean are now close and the distribution is less skewed. We can see that the 0 sum values have decreased, which means that some mean values imputed in have been higher than 0 significantly on some of the days for which the sum would otherwise be 0.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
